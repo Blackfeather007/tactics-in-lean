@@ -26,17 +26,8 @@ jobs:
       - name: add doc-gen4
         run: lake -Kenv=dev update doc-gen4 -R
 
-      - name: get mathlib cache
-        continue-on-error: true
-        run: |
-          lake exe cache clean
-          # We've been seeing many failures at this step recently because of network errors.
-          # As a band-aid, we try twice.
-          # The 'sleep 1' is small pause to let the network recover.
-          lake exe cache get || (sleep 1; lake exe cache get)
-
       - name: build documentation
-        run: lake build && lake build TacticsInLean:docs
+        run: lake build && lake build Mathlib:docs
 
       - name: Fix permissions
         run: |
