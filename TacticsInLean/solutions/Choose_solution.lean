@@ -1,18 +1,15 @@
-/-编写者 : 袁奕(Yuan Yi), 其中`橘色`字体表示面向助教老师们的注释
--/
 import Mathlib.Tactic
 
 
 open Classical
 suppress_compilation -- because everything is noncomputable
 
-universe u_1 u_2 u_5
 
 section Introduction1
 --Reference : https://www.ma.imperial.ac.uk/~buzzard/xena/formalising-mathematics-2024/Part_C/tactics/choose.html
 /-
- Summary : from a proof of a proposition of the form ∀ x, ∃ y, P(x,y) (where P(x,y) is some true-false statement depend on x
- and y), to an actual function which inputs an x and outputs a y such that P(x,y) is true.
+ **∀ x, ∃ y, P(x,y) (where P(x,y) is some true-false statement depend on x and y)**
+ **to an actual function which inputs an x and outputs a y such that P(x,y) is true.**
 -/
 example (X : Type) (P : X → ℝ → Prop)
     /-
@@ -36,20 +33,16 @@ example (X : Type) (P : X → ℝ → Prop)
   intro n
   apply hg
 
-end Introduction3
+end Introduction1
 
 
 
 section Introduction2
 --Reference : Mathmatics in Lean C4S2
-/- To define the inverse of a function f : α → β, we will use two new ingredients. First, we need to
- deal with the fact that an arbitrary type in Lean may be empty. To define the inverse to f at y
- when there is no x satisfying f x = y, we want to assign a default value in α. Adding the
- annotation [Inhabited α] as a variable is tantamount to assuming that α has a preferred element,
- which is denoted default. Second, in the case where there is more than one x such that f x = y, the
- inverse function needs to choose one of them. This requires an appeal to the axiom of choice. Lean
- allows various ways of accessing it; one convenient method is to use the classical choose operator,
-  illustrated below.
+/-
+1. Adding the annotation [Inhabited α] as a variable is tantamount to assuming that α has a preferred element,
+ which is denoted default.
+2. The inverse function requires an appeal to the axiom of choice.
 -/
 variable {α β : Type*} [Inhabited α]
 
@@ -62,9 +55,8 @@ variable (P : α → Prop) (h : ∃ x, P x)
 example : P (Classical.choose h) :=
   Classical.choose_spec h
 
-/- Given h : ∃ x, P x, the value of Classical.choose h is some x satisfying P x. The theorem
-Classical.choose_spec h says that Classical.choose h meets this specification. With these in hand,
-we can define the inverse function as follows: -/
+/- **Given prop h : ∃ x, P x, the value of Classical.choose h is some x satisfying P x.**
+ **The theorem Classical.choose_spec h says that Classical.choose h meets this specification.**-/
 
 def inverse (f : α → β) : β → α := fun y : β ↦
   if h : ∃ x, f x = y then Classical.choose h else default
@@ -122,8 +114,8 @@ section Exercise1
 
 open Set
 
-theorem mySet.InjOn.image_iInter_eq{α : Type u_1} {β : Type u_2} {ι : Sort u_5} [Nonempty ι] {s : ι → Set α} {f : α → β} (h : Set.InjOn f (⋃ (i : ι), s i)) :
-f '' ⋂ (i : ι), s i = ⋂ (i : ι), f '' s i := by
+theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonempty ι] {s : ι → Set α} {f : α → β}
+ (h : Set.InjOn f (⋃ (i : ι), s i)) : f '' ⋂ (i : ι), s i = ⋂ (i : ι), f '' s i := by
   inhabit ι
   refine Subset.antisymm (image_iInter_subset s f) fun y hy => ?_
   simp only [mem_iInter, mem_image] at hy
@@ -139,24 +131,29 @@ f '' ⋂ (i : ι), s i = ⋂ (i : ι), f '' s i := by
 end Exercise1
 
 
---https://github.com/leanprover-community/mathlib4/blob/8bd57d67caa56c16d165be48ea7309648270f309/Mathlib/Data/Set/Lattice.lean#L201
-theorem nonempty_of_nonempty_iUnion
-    {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) : Nonempty ι := by
-  obtain ⟨x, hx⟩ := h_Union
-  exact ⟨Classical.choose <| mem_iUnion.mp hx⟩
-
-
 
 section Exercise2
 
---Reference : https://github.com/leanprover-community/mathlib4/blob/b09464fc7b0ff4bcfd4de7ff54289799009b5913/Mathlib/Logic/Equiv/Set.lean#L406
-universe u v w z
-variable {α : Sort u} {β : Sort v} {γ : Sort w}
+open Set
 
+--https://github.com/leanprover-community/mathlib4/blob/8bd57d67caa56c16d165be48ea7309648270f309/Mathlib/Data/Set/Lattice.lean#L201
+theorem nonempty_of_nonempty_iUnion {α : Type*} {ι : Sort*} {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) :
+ Nonempty ι := by
+  obtain ⟨x, hx⟩ := h_Union
+  have : ∃ i, x ∈ s i := mem_iUnion.mp hx
+  use Classical.choose this
+
+end Exercise2
+
+
+
+section Exercise3
+
+--Reference : https://github.com/leanprover-community/mathlib4/blob/b09464fc7b0ff4bcfd4de7ff54289799009b5913/Mathlib/Logic/Equiv/Set.lean#L406
 open Set
 
 /-- If a function `f` is injective on a set `s`, then `s` is equivalent to `f '' s`. -/
-def imageOfInjOn1 {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
+def myimageOfInjOn {α : Sort*} {β : Sort*} {γ : Sort*}{α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
   toFun := fun p => ⟨f p, mem_image_of_mem f p.2⟩
   invFun := fun p => ⟨Classical.choose p.2, (choose_spec p.2).1⟩
   left_inv := fun ⟨_, h⟩ => Subtype.eq
@@ -164,19 +161,32 @@ def imageOfInjOn1 {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f
         (choose_spec (mem_image_of_mem f h)).2)
   right_inv :=  fun ⟨_, h⟩ => Subtype.eq (Classical.choose_spec h).2
 
-end Exercise2
+end Exercise3
 
 
 
-noncomputable def mySet.sigmaEquiv{α : Type u_1} {β : Type u_2} (s : α → Set β) (hs : ∀ (b : β), ∃! i : α, b ∈ s i) :
+section Exercise4
+
+noncomputable def mySet.sigmaEquiv{α : Type*} {β : Type*} (s : α → Set β) (hs : ∀ (b : β), ∃! i : α, b ∈ s i) :
 (i : α) × ↑(s i) ≃ β where
   toFun | ⟨_, b⟩ => b
   invFun b := ⟨(hs b).choose, b, (hs b).choose_spec.1⟩
   left_inv | ⟨i, b, hb⟩ => Sigma.subtype_ext ((hs b).choose_spec.2 i hb).symm rfl
   right_inv _ := rfl
 
+end Exercise4
+
+
+
 
 section Exercise5
+
+--Some thing useful which similar to Classical.choose
+
+#check Nat.find
+#check Nat.find_spec
+#check Nat.find_min
+
 
 theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
   have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
@@ -190,12 +200,10 @@ theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : �
 
 end Exercise5
 
-section Exercise3
---Some thing useful which similar to Classical.choose
 
-#check Nat.find
-#check Nat.find_spec
-#check Nat.find_min
+
+
+section Exercise6
 
 --https://github.com/leanprover-community/mathlib4/blob/1ed7634f46ba697f891ebfb3577230329d4b7196/Mathlib/Algebra/Order/CauSeq/BigOperators.lean#L154
 #check IsCauSeq.of_decreasing_bounded
@@ -245,4 +253,4 @@ IsCauSeq abs f := fun ε ε0 ↦ by
         rw [← Nat.succ_pred_eq_of_pos (Nat.pos_of_ne_zero hl0), succ_nsmul, sub_add, add_sub_cancel_right]
     _ < f j + ε := by linarith[hl j]
 
-end Exercise3
+end Exercise6
