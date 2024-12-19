@@ -1,6 +1,7 @@
 /-编写者 : 袁奕(Yuan Yi), 其中`橘色`字体表示面向助教老师们的注释
 -/
-import Mathlib
+import Mathlib.Tactic
+
 
 open Classical
 suppress_compilation -- because everything is noncomputable
@@ -200,35 +201,6 @@ end Exercise1
 
 
 
--- section Exercise2
-
--- open Polynomial
--- --https://github.com/leanprover-community/mathlib4/blob/1ed7634f46ba697f891ebfb3577230329d4b7196/Mathlib/Algebra/Polynomial/Coeff.lean#L319
-
--- #check C_dvd_iff_dvd_coeff
--- theorem my_Polynomial.C_dvd_iff_dvd_coeff{R : Type u} [Semiring R] (r : R) (φ : Polynomial R)(h : ∀ i, r ∣ φ.coeff i) :
---  C r ∣ φ := by
---   have : ∃ c : ℕ → R, ∀ (i : ℕ), φ.coeff i = r * c i := by
-
---     sorry
-
-
---   choose c hc using h
---   let c' : ℕ → R := fun i => if i ∈ φ.support then c i else 0
---   let ψ : R[X] := ∑ i ∈ φ.support, monomial i (c' i)
---   use ψ
---   ext i
---   simp only [c', ψ, coeff_C_mul, mem_support_iff, coeff_monomial, finset_sum_coeff,
---     Finset.sum_ite_eq']
---   split_ifs with hi
---   · rw [hc]
---   · rw [Classical.not_not] at hi
---     rwa [mul_zero]
-
--- end Exercise2
-
-
-
 section Exercise3
 --Some thing useful which similar to Classical.choose
 
@@ -292,3 +264,87 @@ end Exercise3
 
 
 -- example [R : Type*][Ring R](ι : ℕ → Ideal R) : ∀ i, ι i ≤ ι (i + 1) → ∃ k, ∀ i > k , ι i = ι k := sorry
+
+--https://github.com/leanprover-community/mathlib4/blob/8bd57d67caa56c16d165be48ea7309648270f309/Mathlib/Data/Set/Lattice.lean#L201
+theorem nonempty_of_nonempty_iUnion
+    {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) : Nonempty ι := by
+  obtain ⟨x, hx⟩ := h_Union
+  exact ⟨Classical.choose <| mem_iUnion.mp hx⟩
+
+theorem InjOn.image_iInter_eq [Nonempty ι] {s : ι → Set α} {f : α → β} (h : InjOn f (⋃ i, s i)) :
+    (f '' ⋂ i, s i) = ⋂ i, f '' s i := by
+  inhabit ι
+  refine Subset.antisymm (image_iInter_subset s f) fun y hy => ?_
+  simp only [mem_iInter, mem_image] at hy
+  choose x hx hy using hy
+  refine ⟨x default, mem_iInter.2 fun i => ?_, hy _⟩
+  suffices x default = x i by
+    rw [this]
+    apply hx
+  replace hx : ∀ i, x i ∈ ⋃ j, s j := fun i => (subset_iUnion _ _) (hx i)
+  apply h (hx _) (hx _)
+  simp only [hy]
+
+
+  theorem surjective_iff_surjective_of_iUnion_eq_univ :
+    Surjective f ↔ ∀ i, Surjective ((U i).restrictPreimage f) := by
+  refine ⟨fun H i => (U i).restrictPreimage_surjective H, fun H x => ?_⟩
+  obtain ⟨i, hi⟩ :=
+    Set.mem_iUnion.mp
+      (show x ∈ Set.iUnion U by rw [hU]; trivial)
+  exact ⟨_, congr_arg Subtype.val (H i ⟨x, hi⟩).choose_spec⟩
+
+
+  noncomputable def sigmaEquiv (s : α → Set β) (hs : ∀ b, ∃! i, b ∈ s i) :
+    (Σ i, s i) ≃ β where
+  toFun | ⟨_, b⟩ => b
+  invFun b := ⟨(hs b).choose, b, (hs b).choose_spec.1⟩
+  left_inv | ⟨i, b, hb⟩ => Sigma.subtype_ext ((hs b).choose_spec.2 i hb).symm rfl
+  right_inv _ := rfl
+
+
+  theorem exists_nat_pow_near (hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
+  have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
+  classical exact
+      let n := Nat.find h
+      have hn : x < y ^ n := Nat.find_spec h
+      have hnp : 0 < n :=
+        pos_iff_ne_zero.2 fun hn0 => by rw [hn0, pow_zero] at hn; exact not_le_of_gt hn hx
+      have hnsp : Nat.pred n + 1 = n := Nat.succ_pred_eq_of_pos hnp
+      have hltn : Nat.pred n < n := Nat.pred_lt (ne_of_gt hnp)
+      ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
+
+/-- In a `p ^ ∞`-torsion module (that is, a module where all elements are cancelled by scalar
+multiplication by some power of `p`), the smallest `n` such that `p ^ n • x = 0`. -/
+def pOrder {p : R} (hM : IsTorsion' M <| Submonoid.powers p) (x : M)
+    [∀ n : ℕ, Decidable (p ^ n • x = 0)] :=
+  Nat.find <| (isTorsion'_powers_iff p).mp hM x
+
+@[simp]
+theorem pow_pOrder_smul {p : R} (hM : IsTorsion' M <| Submonoid.powers p) (x : M)
+    [∀ n : ℕ, Decidable (p ^ n • x = 0)] : p ^ pOrder hM x • x = 0 :=
+  Nat.find_spec <| (isTorsion'_powers_iff p).mp hM x
+
+
+  theorem exists_of_not_isSquare (h₀ : 0 < d) (hd : ¬IsSquare d) :
+    ∃ a : Solution₁ d, IsFundamental a := by
+  obtain ⟨a, ha₁, ha₂⟩ := exists_pos_of_not_isSquare h₀ hd
+  -- convert to `x : ℕ` to be able to use `Nat.find`
+  have P : ∃ x' : ℕ, 1 < x' ∧ ∃ y' : ℤ, 0 < y' ∧ (x' : ℤ) ^ 2 - d * y' ^ 2 = 1 := by
+    have hax := a.prop
+    lift a.x to ℕ using by positivity with ax
+    norm_cast at ha₁
+    exact ⟨ax, ha₁, a.y, ha₂, hax⟩
+  classical
+  -- to avoid having to show that the predicate is decidable
+  let x₁ := Nat.find P
+  obtain ⟨hx, y₁, hy₀, hy₁⟩ := Nat.find_spec P
+  refine ⟨mk x₁ y₁ hy₁, by rw [x_mk]; exact mod_cast hx, hy₀, fun {b} hb => ?_⟩
+  rw [x_mk]
+  have hb' := (Int.toNat_of_nonneg <| zero_le_one.trans hb.le).symm
+  have hb'' := hb
+  rw [hb'] at hb ⊢
+  norm_cast at hb ⊢
+  refine Nat.find_min' P ⟨hb, |b.y|, abs_pos.mpr <| y_ne_zero_of_one_lt_x hb'', ?_⟩
+  rw [← hb', sq_abs]
+  exact b.prop
