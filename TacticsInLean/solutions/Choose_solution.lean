@@ -316,38 +316,3 @@ theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : �
   exact ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
 
 end Exercise5
-
-/-- In a `p ^ ∞`-torsion module (that is, a module where all elements are cancelled by scalar
-multiplication by some power of `p`), the smallest `n` such that `p ^ n • x = 0`. -/
-def pOrder {p : R} (hM : IsTorsion' M <| Submonoid.powers p) (x : M)
-    [∀ n : ℕ, Decidable (p ^ n • x = 0)] :=
-  Nat.find <| (isTorsion'_powers_iff p).mp hM x
-
-@[simp]
-theorem pow_pOrder_smul {p : R} (hM : IsTorsion' M <| Submonoid.powers p) (x : M)
-    [∀ n : ℕ, Decidable (p ^ n • x = 0)] : p ^ pOrder hM x • x = 0 :=
-  Nat.find_spec <| (isTorsion'_powers_iff p).mp hM x
-
-
-  theorem exists_of_not_isSquare (h₀ : 0 < d) (hd : ¬IsSquare d) :
-    ∃ a : Solution₁ d, IsFundamental a := by
-  obtain ⟨a, ha₁, ha₂⟩ := exists_pos_of_not_isSquare h₀ hd
-  -- convert to `x : ℕ` to be able to use `Nat.find`
-  have P : ∃ x' : ℕ, 1 < x' ∧ ∃ y' : ℤ, 0 < y' ∧ (x' : ℤ) ^ 2 - d * y' ^ 2 = 1 := by
-    have hax := a.prop
-    lift a.x to ℕ using by positivity with ax
-    norm_cast at ha₁
-    exact ⟨ax, ha₁, a.y, ha₂, hax⟩
-  classical
-  -- to avoid having to show that the predicate is decidable
-  let x₁ := Nat.find P
-  obtain ⟨hx, y₁, hy₀, hy₁⟩ := Nat.find_spec P
-  refine ⟨mk x₁ y₁ hy₁, by rw [x_mk]; exact mod_cast hx, hy₀, fun {b} hb => ?_⟩
-  rw [x_mk]
-  have hb' := (Int.toNat_of_nonneg <| zero_le_one.trans hb.le).symm
-  have hb'' := hb
-  rw [hb'] at hb ⊢
-  norm_cast at hb ⊢
-  refine Nat.find_min' P ⟨hb, |b.y|, abs_pos.mpr <| y_ne_zero_of_one_lt_x hb'', ?_⟩
-  rw [← hb', sq_abs]
-  exact b.prop
