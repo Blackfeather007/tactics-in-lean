@@ -6,76 +6,14 @@ import Mathlib.Tactic
 open Classical
 suppress_compilation -- because everything is noncomputable
 
-
+universe u_1 u_2 u_5
 
 section Introduction1
---Reference : https://www.ma.imperial.ac.uk/~buzzard/xena/formalising-mathematics-2024/Part_B/the_axiom_of_choice.html
-/- In my experience, the way people want to use the axiom of choice when doing mathematics in Lean
- is to get an element of X not from a hypothesis ∃ x : X, true, but from a hypothesis like
- ∃ x : ℝ, x^2 = 2 or more generally ∃ x : X, p x where p : X → Prop is a predicate on X. The way to
- do this is as follows: you run Classical.choose on h : ∃ x : X, p x to get the element of X, and
- the proof that this element satisfies p is Classical.choose_spec h. Here’s a worked example.-/
-
-open Polynomial -- so I can use notation ℂ[X] for polynomial rings
-                -- and so I can write `X` and not `polynomial.X`
-
-def f : ℂ[X] := X^5 + X + 37 -- a random polynomial
-
-lemma f_degree : degree f = 5 := by
-  unfold f
-  compute_degree -- polynomial degree computing tactic
-  · norm_num
-  · exact Nat.le_of_ble_eq_true rfl
-
-theorem f_has_a_root : ∃ (z : ℂ), f.IsRoot z := by
-  apply Complex.exists_root -- the fundamental theorem of algebra
-  -- ⊢ 0 < degree f
-  rw [f_degree]
-  -- ⊢ 0 < 5
-  norm_num
-
--- let z be a root of f (getting data from a theorem)
-def z : ℂ := choose f_has_a_root
-
--- proof that z is a root of f (the "API" for `Classical.choose`)
-theorem z_is_a_root_of_f : f.IsRoot z := by exact choose_spec f_has_a_root
-
--- #check choose f_has_a_root
--- #check choose_spec f_has_a_root
-
---We should prioritize using **recases** or **obtain** over **Classcal.choose**.
-example : 1 = 1 := by
-  rcases f_has_a_root with  ⟨z1, z1_is_a_root_of_f⟩
-  -- #check z1
-  -- #check z1_is_a_root_of_f
-  have z1_is_a_root_of_f : f.IsRoot z1 := by exact z1_is_a_root_of_f
-
-  simp only
-
-example : 1 = 1 := by
-  obtain ⟨z2, z2_is_a_root_of_f⟩ := f_has_a_root
-  -- #check z2
-  -- #check z2_is_a_root_of_f
-  have z2_is_a_root_of_f : f.IsRoot z2 := by exact z2_is_a_root_of_f
-
-  simp only
-
-end Introduction1
-
-
-
-section Introduction3
 --Reference : https://www.ma.imperial.ac.uk/~buzzard/xena/formalising-mathematics-2024/Part_C/tactics/choose.html
-/- Summary : The choose tactic is a relatively straightforward way to go from a proof of a
- proposition of the form ∀ x, ∃ y, P(x,y) (where P(x,y) is some true-false statement depend on x
+/-
+ Summary : from a proof of a proposition of the form ∀ x, ∃ y, P(x,y) (where P(x,y) is some true-false statement depend on x
  and y), to an actual function which inputs an x and outputs a y such that P(x,y) is true.
-
-  Basic usage : The simplest situation where you find yourself wanting to use choose is if you have
- a function f : X → Y which you know is surjective, and you want to write down a one-sided inverse
- g : Y → X, i.e., such that f(g(y))=y for all y : Y. Here’s the set-up:-/
-
-/-`X` is an abstract type and `P` is an abstract true-false
-statement depending on an element of `X` and a real number.-/
+-/
 example (X : Type) (P : X → ℝ → Prop)
     /-
     `h` is the hypothesis that given some `ε > 0` you can find
@@ -182,6 +120,35 @@ end Example1
 
 section Exercise1
 
+open Set
+
+theorem mySet.InjOn.image_iInter_eq{α : Type u_1} {β : Type u_2} {ι : Sort u_5} [Nonempty ι] {s : ι → Set α} {f : α → β} (h : Set.InjOn f (⋃ (i : ι), s i)) :
+f '' ⋂ (i : ι), s i = ⋂ (i : ι), f '' s i := by
+  inhabit ι
+  refine Subset.antisymm (image_iInter_subset s f) fun y hy => ?_
+  simp only [mem_iInter, mem_image] at hy
+  choose x hx hy using hy
+  refine ⟨x default, mem_iInter.2 fun i => ?_, hy _⟩
+  suffices x default = x i by
+    rw [this]
+    apply hx
+  replace hx : ∀ i, x i ∈ ⋃ j, s j := fun i => (subset_iUnion _ _) (hx i)
+  apply h (hx _) (hx _)
+  simp only [hy]
+
+end Exercise1
+
+
+--https://github.com/leanprover-community/mathlib4/blob/8bd57d67caa56c16d165be48ea7309648270f309/Mathlib/Data/Set/Lattice.lean#L201
+theorem nonempty_of_nonempty_iUnion
+    {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) : Nonempty ι := by
+  obtain ⟨x, hx⟩ := h_Union
+  exact ⟨Classical.choose <| mem_iUnion.mp hx⟩
+
+
+
+section Exercise2
+
 --Reference : https://github.com/leanprover-community/mathlib4/blob/b09464fc7b0ff4bcfd4de7ff54289799009b5913/Mathlib/Logic/Equiv/Set.lean#L406
 universe u v w z
 variable {α : Sort u} {β : Sort v} {γ : Sort w}
@@ -197,9 +164,31 @@ def imageOfInjOn1 {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f
         (choose_spec (mem_image_of_mem f h)).2)
   right_inv :=  fun ⟨_, h⟩ => Subtype.eq (Classical.choose_spec h).2
 
-end Exercise1
+end Exercise2
 
 
+
+noncomputable def mySet.sigmaEquiv{α : Type u_1} {β : Type u_2} (s : α → Set β) (hs : ∀ (b : β), ∃! i : α, b ∈ s i) :
+(i : α) × ↑(s i) ≃ β where
+  toFun | ⟨_, b⟩ => b
+  invFun b := ⟨(hs b).choose, b, (hs b).choose_spec.1⟩
+  left_inv | ⟨i, b, hb⟩ => Sigma.subtype_ext ((hs b).choose_spec.2 i hb).symm rfl
+  right_inv _ := rfl
+
+
+section Exercise5
+
+theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
+  have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
+  let n := Nat.find h
+  have hn : x < y ^ n := Nat.find_spec h
+  have hnp : 0 < n :=
+    pos_iff_ne_zero.2 fun hn0 => by rw [hn0, pow_zero] at hn; exact not_le_of_gt hn hx
+  have hnsp : Nat.pred n + 1 = n := Nat.succ_pred_eq_of_pos hnp
+  have hltn : Nat.pred n < n := Nat.pred_lt (ne_of_gt hnp)
+  exact ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
+
+end Exercise5
 
 section Exercise3
 --Some thing useful which similar to Classical.choose
@@ -257,62 +246,3 @@ IsCauSeq abs f := fun ε ε0 ↦ by
     _ < f j + ε := by linarith[hl j]
 
 end Exercise3
-
-
---Reference : https://github.com/leanprover-community/mathlib4/blob/197eebfa5455aa09b7a4c2ad3c3eb9123245df90/Mathlib/FieldTheory/JacobsonNoether.lean#L120
-
-
-
--- example [R : Type*][Ring R](ι : ℕ → Ideal R) : ∀ i, ι i ≤ ι (i + 1) → ∃ k, ∀ i > k , ι i = ι k := sorry
-
---https://github.com/leanprover-community/mathlib4/blob/8bd57d67caa56c16d165be48ea7309648270f309/Mathlib/Data/Set/Lattice.lean#L201
-theorem nonempty_of_nonempty_iUnion
-    {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) : Nonempty ι := by
-  obtain ⟨x, hx⟩ := h_Union
-  exact ⟨Classical.choose <| mem_iUnion.mp hx⟩
-
-theorem InjOn.image_iInter_eq [Nonempty ι] {s : ι → Set α} {f : α → β} (h : InjOn f (⋃ i, s i)) :
-    (f '' ⋂ i, s i) = ⋂ i, f '' s i := by
-  inhabit ι
-  refine Subset.antisymm (image_iInter_subset s f) fun y hy => ?_
-  simp only [mem_iInter, mem_image] at hy
-  choose x hx hy using hy
-  refine ⟨x default, mem_iInter.2 fun i => ?_, hy _⟩
-  suffices x default = x i by
-    rw [this]
-    apply hx
-  replace hx : ∀ i, x i ∈ ⋃ j, s j := fun i => (subset_iUnion _ _) (hx i)
-  apply h (hx _) (hx _)
-  simp only [hy]
-
-
-  theorem surjective_iff_surjective_of_iUnion_eq_univ :
-    Surjective f ↔ ∀ i, Surjective ((U i).restrictPreimage f) := by
-  refine ⟨fun H i => (U i).restrictPreimage_surjective H, fun H x => ?_⟩
-  obtain ⟨i, hi⟩ :=
-    Set.mem_iUnion.mp
-      (show x ∈ Set.iUnion U by rw [hU]; trivial)
-  exact ⟨_, congr_arg Subtype.val (H i ⟨x, hi⟩).choose_spec⟩
-
-
-  noncomputable def sigmaEquiv (s : α → Set β) (hs : ∀ b, ∃! i, b ∈ s i) :
-    (Σ i, s i) ≃ β where
-  toFun | ⟨_, b⟩ => b
-  invFun b := ⟨(hs b).choose, b, (hs b).choose_spec.1⟩
-  left_inv | ⟨i, b, hb⟩ => Sigma.subtype_ext ((hs b).choose_spec.2 i hb).symm rfl
-  right_inv _ := rfl
-
-
-section Exercise5
-
-theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
-  have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
-  let n := Nat.find h
-  have hn : x < y ^ n := Nat.find_spec h
-  have hnp : 0 < n :=
-    pos_iff_ne_zero.2 fun hn0 => by rw [hn0, pow_zero] at hn; exact not_le_of_gt hn hx
-  have hnsp : Nat.pred n + 1 = n := Nat.succ_pred_eq_of_pos hnp
-  have hltn : Nat.pred n < n := Nat.pred_lt (ne_of_gt hnp)
-  exact ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
-
-end Exercise5
