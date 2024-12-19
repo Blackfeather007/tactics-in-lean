@@ -303,16 +303,19 @@ theorem InjOn.image_iInter_eq [Nonempty ι] {s : ι → Set α} {f : α → β} 
   right_inv _ := rfl
 
 
-  theorem exists_nat_pow_near (hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
+section Exercise5
+
+theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
   have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
-  classical exact
-      let n := Nat.find h
-      have hn : x < y ^ n := Nat.find_spec h
-      have hnp : 0 < n :=
-        pos_iff_ne_zero.2 fun hn0 => by rw [hn0, pow_zero] at hn; exact not_le_of_gt hn hx
-      have hnsp : Nat.pred n + 1 = n := Nat.succ_pred_eq_of_pos hnp
-      have hltn : Nat.pred n < n := Nat.pred_lt (ne_of_gt hnp)
-      ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
+  let n := Nat.find h
+  have hn : x < y ^ n := Nat.find_spec h
+  have hnp : 0 < n :=
+    pos_iff_ne_zero.2 fun hn0 => by rw [hn0, pow_zero] at hn; exact not_le_of_gt hn hx
+  have hnsp : Nat.pred n + 1 = n := Nat.succ_pred_eq_of_pos hnp
+  have hltn : Nat.pred n < n := Nat.pred_lt (ne_of_gt hnp)
+  exact ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
+
+end Exercise5
 
 /-- In a `p ^ ∞`-torsion module (that is, a module where all elements are cancelled by scalar
 multiplication by some power of `p`), the smallest `n` such that `p ^ n • x = 0`. -/
