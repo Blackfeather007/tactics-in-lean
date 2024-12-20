@@ -12,15 +12,13 @@ section Introduction1
  **to an actual function which inputs an x and outputs a y such that P(x,y) is true.**
 -/
 example (X : Type) (P : X → ℝ → Prop)
-    /-
-    `h` is the hypothesis that given some `ε > 0` you can find
-    an `x` such that the proposition is true for `x` and `ε`
-    -/
-    (h : ∀ ε > 0, ∃ x, P x ε) :
-  /-
-  Conclusion: there's a sequence of elements of `X` satisfying the
-  condition for smaller and smaller ε
-  -/
+/-
+`h` is the hypothesis that given some `ε > 0` you can find an `x` such that the proposition is true for `x` and `ε`
+-/
+(h : ∀ ε > 0, ∃ x, P x ε) :
+/-
+Conclusion: there's a sequence of elements of `X` satisfying the condition for smaller and smaller ε
+-/
   ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
   choose g hg using h
   /-
@@ -39,14 +37,18 @@ end Introduction1
 
 section Introduction2
 --Reference : Mathmatics in Lean C4S2
-/-
-1. Adding the annotation [Inhabited α] as a variable is tantamount to assuming that α has a preferred element,
- which is denoted default.
-2. The inverse function requires an appeal to the axiom of choice.
--/
+
 variable {α β : Type*} [Inhabited α]
 
 #check (default : α)
+/-
+ Inhabited α is a typeclass that says that α has a designated element, called (default : α).
+ This is sometimes referred to as a "pointed type".
+ This class is used by functions that need to return a value of the type when called "out of domain".
+ For example, Array.get! arr i : α returns a value of type α when arr : Array α, but if i is not in range of the array,
+ it reports a panic message, but this does not halt the program, so it must still return a value of type α
+ (and in fact this is required for logical consistency), so in this case it returns default.
+-/
 
 variable (P : α → Prop) (h : ∃ x, P x)
 
@@ -64,15 +66,6 @@ def inverse (f : α → β) : β → α := fun y : β ↦
 theorem inverse_spec {f : α → β} (y : β) (h : ∃ x, f x = y) : f (inverse f y) = y := by
   rw [inverse, dif_pos h]
   exact Classical.choose_spec h
-
-/-The lines noncomputable section and open Classical are needed because we are using classical logic
- in an essential way. On input y, the function inverse f returns some value of x satisfying f x = y
- if there is one, and a default element of α otherwise. This is an instance of a dependent if
- construction, since in the positive case, the value returned, Classical.choose h, depends on the
- assumption h. The identity dif_pos h rewrites if h : e then a else bto a given h : e, and,
- similarly, dif_neg h rewrites it to b given h : ¬ e. There are also versions if_pos and if_neg that
- works for non-dependent if constructions and will be used in the next section. The theorem
- inverse_spec says that inverse f meets the first part of this specification.-/
 
 end Introduction2
 
@@ -110,25 +103,32 @@ end Example1
 
 
 
-section Exercise1
+section Example2
 
 open Set
 
-theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonempty ι] {s : ι → Set α} {f : α → β}
+theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonempty ι] [Inhabited ι]{s : ι → Set α} {f : α → β}
  (h : Set.InjOn f (⋃ (i : ι), s i)) : f '' ⋂ (i : ι), s i = ⋂ (i : ι), f '' s i := by
-  inhabit ι
-  refine Subset.antisymm (image_iInter_subset s f) fun y hy => ?_
-  simp only [mem_iInter, mem_image] at hy
-  choose x hx hy using hy
-  refine ⟨x default, mem_iInter.2 fun i => ?_, hy _⟩
-  suffices x default = x i by
-    rw [this]
-    apply hx
-  replace hx : ∀ i, x i ∈ ⋃ j, s j := fun i => (subset_iUnion _ _) (hx i)
-  apply h (hx _) (hx _)
-  simp only [hy]
+  apply Subset.antisymm
+  · exact image_iInter_subset s f
+  · intro y hy
+    simp only [mem_iInter, mem_image] at hy
+    --`挖空`
+    choose x hx hy using hy
+    use x default
 
-end Exercise1
+    constructor
+    · apply mem_iInter.2
+      intro i
+      suffices x default = x i by
+        rw [this]
+        apply hx
+      have : ∀ i, x i ∈ ⋃ j, s j := fun i => (subset_iUnion _ _) (hx i)
+      apply h (this _) (this _)
+      simp only [hy]
+    · exact hy default
+
+end Example2
 
 
 
@@ -153,7 +153,7 @@ section Exercise3
 open Set
 
 /-- If a function `f` is injective on a set `s`, then `s` is equivalent to `f '' s`. -/
-def myimageOfInjOn {α : Sort*} {β : Sort*} {γ : Sort*}{α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
+def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
   toFun := fun p => ⟨f p, mem_image_of_mem f p.2⟩
   invFun := fun p => ⟨Classical.choose p.2, (choose_spec p.2).1⟩
   left_inv := fun ⟨_, h⟩ => Subtype.eq
@@ -199,7 +199,6 @@ theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : �
   exact ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
 
 end Exercise5
-
 
 
 
