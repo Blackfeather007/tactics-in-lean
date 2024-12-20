@@ -43,7 +43,7 @@ example {a : ℝ} : a ^ 2 - 6 = (a + Real.sqrt 6) * (a - Real.sqrt 6) :=
    _ = a ^ 2 - (Real.sqrt 6) ^ 2 := by simp [Nat.ofNat_nonneg, Real.sq_sqrt]
    _ = _ := by ring
 
-example (x : ℝ) (hx : x ^ 2 - 5 * x + 6 = 0) :  x = 3 ∨ x = 2 := by
+example (x : ℝ) (hx : x ^ 2 - 5 * x + 6 = 0) : x = 3 ∨ x = 2 := by
   rw [show x ^ 2 - 5 * x + 6 = (x - 3) * (x - 2) by ring, mul_eq_zero] at hx
   simp only [sub_eq_zero] at hx
   exact hx
