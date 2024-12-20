@@ -91,30 +91,57 @@ end Introduction2
 
 
 section Example1
+--Reference : https://github.com/leanprover-community/mathlib4/blob/b09464fc7b0ff4bcfd4de7ff54289799009b5913/Mathlib/Logic/Equiv/Set.lean#L406
+--`有类型转换`
 
-open Pointwise
+open Set
 
-def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K) := by
-  intro x
+#check Equiv.Set.imageOfInjOn
 
-  have mem_mul_eq : ∃ x_1 ∈ H, ∃ y ∈ K, x_1 * y = x.1 := by
-    apply Set.mem_mul.mp
-    exact Subtype.coe_prop x
+/-- If a function `f` is injective on a set `s`, then `s` is equivalent to `f '' s`. -/
+def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
+  toFun := by
+    intro p
+    use f p
+    exact mem_image_of_mem f p.2
+  invFun := by
+    intro p
+    --`挖空`
+    have hint : p.1 ∈ f '' s := p.2
+    use choose p.2
+    exact (choose_spec p.2).1
+  left_inv := by
+    --We want to prove f⁻¹ (f p) = p
+    intro p
+    have : f p ∈ f '' s := mem_image_of_mem f p.2
+    show ⟨choose this, (choose_spec this).1⟩ = p
 
-  --`此题涉及到若干处类型转换, 较为困难,因此主讲老师 必须 讲解这道题`
-  --之所以考虑保留此题是考虑到类型转换"早折磨晚折磨应该也差不多"
+    have feq : f (choose this) = f p := by
+      --`挖空`
+      exact (choose_spec (mem_image_of_mem f p.2)).2
 
-  -- obtain⟨a, ha⟩ := mem_mul_eq
-  set a := choose mem_mul_eq with a_def
-  set ha := choose_spec mem_mul_eq
-  set b := choose ha.2 with b_def
-  set hb := choose_spec ha.2
-  -- simp only [Subsemigroup.mem_carrier, Submonoid.mem_toSubsemigroup, Subgroup.mem_toSubmonoid, ←
-  --   a_def, ← b_def] at ha hb--`非必须, 方便看infoview`
+    have : (choose this) =  p := by
+      apply H
+      --`挖空`
+      exact (choose_spec (mem_image_of_mem f p.2)).1
+      exact p.2
+      exact feq
+    exact SetCoe.ext this
 
-  use ⟨a, ha.1⟩, b
-  exact hb.1
+  right_inv := by
+    --We want to prove f (f⁻¹ p) = p
+    intro p
+    have : f (choose p.2) ∈ (f '' s) := by
+      apply mem_image_of_mem
+      --`挖空`
+      exact (choose_spec p.2).1
+    show ⟨f (choose p.2) ,this⟩ = p
 
+    have : f (choose p.2) = p.1 := by
+      --`挖空`
+      exact (choose_spec p.2).2
+
+    exact SetCoe.ext this
 end Example1
 
 
@@ -188,57 +215,29 @@ end Exercise2
 
 
 section Exercise3
---Reference : https://github.com/leanprover-community/mathlib4/blob/b09464fc7b0ff4bcfd4de7ff54289799009b5913/Mathlib/Logic/Equiv/Set.lean#L406
---`有类型转换`
 
-open Set
+open Pointwise
 
-#check Equiv.Set.imageOfInjOn
+def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K) := by
+  intro x
 
-/-- If a function `f` is injective on a set `s`, then `s` is equivalent to `f '' s`. -/
-def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
-  toFun := by
-    intro p
-    use f p
-    exact mem_image_of_mem f p.2
-  invFun := by
-    intro p
-    --`挖空`
-    have hint : p.1 ∈ f '' s := p.2
-    use choose p.2
-    exact (choose_spec p.2).1
-  left_inv := by
-    --We want to prove f⁻¹ (f p) = p
-    intro p
-    have : f p ∈ f '' s := mem_image_of_mem f p.2
-    show ⟨choose this, (choose_spec this).1⟩ = p
+  have mem_mul_eq : ∃ x_1 ∈ H, ∃ y ∈ K, x_1 * y = x.1 := by
+    apply Set.mem_mul.mp
+    exact Subtype.coe_prop x
 
-    have feq : f (choose this) = f p := by
-      --`挖空`
-      exact (choose_spec (mem_image_of_mem f p.2)).2
+  --`此题涉及到若干处类型转换, 较为困难,因此主讲老师 必须 讲解这道题`
+  --之所以考虑保留此题是考虑到类型转换"早折磨晚折磨应该也差不多"
 
-    have : (choose this) =  p := by
-      apply H
-      --`挖空`
-      exact (choose_spec (mem_image_of_mem f p.2)).1
-      exact p.2
-      exact feq
-    exact SetCoe.ext this
+  -- obtain⟨a, ha⟩ := mem_mul_eq
+  set a := choose mem_mul_eq with a_def
+  set ha := choose_spec mem_mul_eq
+  set b := choose ha.2 with b_def
+  set hb := choose_spec ha.2
+  -- simp only [Subsemigroup.mem_carrier, Submonoid.mem_toSubsemigroup, Subgroup.mem_toSubmonoid, ←
+  --   a_def, ← b_def] at ha hb--`非必须, 方便看infoview`
 
-  right_inv := by
-    --We want to prove f (f⁻¹ p) = p
-    intro p
-    have : f (choose p.2) ∈ (f '' s) := by
-      apply mem_image_of_mem
-      --`挖空`
-      exact (choose_spec p.2).1
-    show ⟨f (choose p.2) ,this⟩ = p
-
-    have : f (choose p.2) = p.1 := by
-      --`挖空`
-      exact (choose_spec p.2).2
-
-    exact SetCoe.ext this
+  use ⟨a, ha.1⟩, b
+  exact hb.1
 
 end Exercise3
 
@@ -254,11 +253,23 @@ noncomputable def mySet.sigmaEquiv{α : Type*} {β : Type*} (s : α → Set β) 
   toFun := by
     intro p
     use p.2
-  invFun b := by
-
-    exact ⟨(hs b).choose, b, (hs b).choose_spec.1⟩
-  left_inv := fun ⟨i, b, hb⟩ => Sigma.subtype_ext ((hs b).choose_spec.2 i hb).symm rfl
-  right_inv _ := rfl
+  invFun := by
+    intro b
+    exact ⟨(hs b).choose, ⟨b, (hs b).choose_spec.1⟩⟩
+  left_inv := by
+    intro p
+    ext
+    · show (hs p.2).choose = p.1
+      apply ExistsUnique.unique (hs p.2)
+      · have : p.2.1 ∈ s (hs p.2).choose := by
+          --`挖空`
+          exact (hs p.2).choose_spec.1
+        exact this
+      · have : p.2.1 ∈ s p.1 := by
+          exact Subtype.coe_prop p.snd
+        exact this
+    · rfl
+  right_inv _:= rfl
 
 end Exercise4
 
