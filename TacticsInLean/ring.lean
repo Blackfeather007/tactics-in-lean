@@ -51,7 +51,7 @@ open Complex
 example {a : ℝ} : a ^ 2 - 6 = (a + Real.sqrt 6) * (a - Real.sqrt 6) :=
   sorry
 
-example (x : ℝ) (hx : x ^ 2 - 5 * x + 6 = 0) :  x = 3 ∨ x = 2 :=
+example (x : ℝ) (hx : x ^ 2 - 5 * x + 6 = 0) : x = 3 ∨ x = 2 :=
   sorry
 
 example (a : ℂ) (h : (a + 2) ^ 2 = - 9) : a + 2 = 3 * I ∨ a + 2 = - (3 * I) :=
