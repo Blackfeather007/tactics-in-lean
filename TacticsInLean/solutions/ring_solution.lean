@@ -29,7 +29,7 @@ example (x y : ℕ) : x * 2 + id y = y + 2 * id x := by
 example {R : Type} [Ring R] (a b : R) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + a * b + b * a := by
   ring_nf -- Nothing happened.
   sorry
--- NOTICE: `ring`, `ring_nf`, and `ring!` etc. only work for commutative (semi)rings.
+-- NOTICE: `ring`, `ring_nf`, and `ring!` etc. only work for **commutative** (semi)rings.
 
 example {R : Type} [Ring R] (a b : R) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + a * b + b * a := by
   noncomm_ring
