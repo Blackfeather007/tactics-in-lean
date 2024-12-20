@@ -1,4 +1,4 @@
-import Mathlib.tactic
+import Mathlib.Tactic
 
 section Ring
 
