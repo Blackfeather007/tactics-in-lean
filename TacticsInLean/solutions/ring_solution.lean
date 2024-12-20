@@ -19,7 +19,7 @@ example (x y : ℤ) (h : (x - y) ^ 2 = 0) : x ^ 2 + y ^ 2 = 2 * x * y := by
   ring_nf at h
   rw [← add_zero (2 * x * y), ← h]
   ring
--- `ring_nf` can be used at hypothesis.
+-- `ring_nf` can be used non-terminally to normalize ring expressions in hypothesis.
 
 example (x y : ℕ) : x * 2 + id y = y + 2 * id x := by
   ring! -- simp only [id_eq] ; ring
@@ -27,9 +27,9 @@ example (x y : ℕ) : x * 2 + id y = y + 2 * id x := by
 -- But it will not always be useful.
 
 example {R : Type} [Ring R] (a b : R) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + a * b + b * a := by
-  ring says ring_nf -- Nothing happened.
+  ring_nf -- Nothing happened.
   sorry
--- `ring` or `ring_nf` only work for commutative (semi)rings.
+-- NOTICE: `ring`, `ring_nf`, and `ring!` etc. only work for commutative (semi)rings.
 
 example {R : Type} [Ring R] (a b : R) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + a * b + b * a := by
   noncomm_ring
