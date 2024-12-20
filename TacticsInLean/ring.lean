@@ -30,25 +30,24 @@ example {x y : ℤ} : (x + y) ^ 2 = x ^ 2 + 2 * x * y + y ^ 2 := by
 -- `ring` can be used to prove the equality in a commutative (semi)rings.
 
 
-example {n m : ℕ} : (n + m) ^ 2 = n ^ 2 + 2 * n * m + m ^ 2 := by
+example {n m : ℕ} : (n + m) ^ 3 = n ^ 3 + m ^ 3 + 3 * m ^ 2 * n + 3 * m * n ^ 2 := by
   sorry
 -- It also works for natural numbers (commuative semiring).
 
 
 example (x y : ℝ) (f : ℝ → ℝ):  f (x + y) + f (y + x) = 2 * f (x + y) := by
-  ring says ring_nf
+  sorry
 -- `ring_nf` can also prove some equations that ring may not be able to,
 -- because they involve ring reasoning inside a subterm.
 
 
-example (x y : ℤ) (h : (x - y) ^ 2 = 0) : x ^ 2 + y ^ 2 - 2 * x * y = 0 := by
-  ring_nf at h ⊢
-  exact h
--- `ring_nf` can be used at hypothesis and goal.
+example (x y : ℤ) (h : (x - y) ^ 2 = 0) : x ^ 2 + y ^ 2 = 2 * x * y := by
+  sorry
+-- `ring_nf` can be used at hypothesis.
 
 
 example (x y : ℕ) : x + id y = y + id x := by
-  ring! -- rw [id_eq] ; ring_nf
+  sorry
 -- `ring!` will use a more aggressive reducibility setting to determine equality of atoms.
 -- But it will not be always useful.
 
@@ -59,41 +58,26 @@ example {R : Type} [Ring R] (a b : R) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + a * b + b 
 
 
 example {R : Type} [Ring R] (a b : R) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + a * b + b * a := by
-  noncomm_ring
+  sorry
 -- `noncomm_ring` can simplify identities in not-necessarily-commutative rings.
 
 
 open Complex
 
 example {a : ℝ} : a ^ 2 - 6 = (a + Real.sqrt 6) * (a - Real.sqrt 6) := by
-  calc
-   _ = a ^ 2 - (Real.sqrt 6) ^ 2 := by simp only [Nat.ofNat_nonneg, Real.sq_sqrt]
-   _ = _ := by ring
-
+  sorry
 
 example (x : ℝ) (hx : x ^ 2 - 5 * x + 6 = 0) :  x = 3 ∨ x = 2 := by
-  rw [show x ^ 2 - 5 * x + 6 = (x - 3) * (x - 2) by ring, mul_eq_zero] at hx
-  rw [sub_eq_zero, sub_eq_zero] at hx
-  exact hx
+  sorry
 
 
 example (a : ℂ) (h : (a + 2) ^ 2 = - 9) : a + 2 = 3 * I ∨ a + 2 = - (3 * I) := by
-  rw [show - 9 = (3 * I) ^ 2 by ring_nf ; simp] at h
-  rw [sq_eq_sq_iff_eq_or_eq_neg (a := a + 2) (b := 3 * I)] at h
-  exact h
+  sorry
 -- Try using `ring` to simpilify each small step.
 
 
 example (a b : ℝ) : 2 * a * b ≤ a ^ 2 + b ^ 2 := by
-  have h : 0 ≤ a ^ 2 - 2 * a * b + b ^ 2
-  calc
-    a ^ 2 - 2 * a * b + b ^ 2 = (a - b) ^ 2 := by ring
-    _ ≥ 0 := pow_two_nonneg (a - b)
-
-  calc
-    2 * a * b = 2 * a * b + 0 := by ring
-    _ ≤ 2 * a * b + (a ^ 2 - 2 * a * b + b ^ 2) := (add_le_add_iff_left (2 * a * b)).2 h
-    _ = a ^ 2 + b ^ 2 := by ring
+  sorry
 
 
 
