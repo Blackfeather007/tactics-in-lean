@@ -7,9 +7,26 @@ suppress_compilation -- because everything is noncomputable
 
 section Introduction1
 --Reference : https://www.ma.imperial.ac.uk/~buzzard/xena/formalising-mathematics-2024/Part_C/tactics/choose.html
+--Reference : https://github.com/leanprover-community/mathlib4/blob/725fd7ac1c92cf4d7984b25646052f5a6e717d31/Mathlib/Tactic/Choose.lean#
 /-
  **∀ x, ∃ y, P(x,y) (where P(x,y) is some true-false statement depend on x and y)**
  **to an actual function which inputs an x and outputs a y such that P(x,y) is true.**
+ * `choose a b h h' using hyp` takes a hypothesis `hyp` of the form
+  `∀ (x : X) (y : Y), ∃ (a : A) (b : B), P x y a b ∧ Q x y a b`
+  for some `P Q : X → Y → A → B → Prop` and outputs
+  into context a function `a : X → Y → A`, `b : X → Y → B` and two assumptions:
+  `h : ∀ (x : X) (y : Y), P x y (a x y) (b x y)` and
+  `h' : ∀ (x : X) (y : Y), Q x y (a x y) (b x y)`. It also works with dependent versions.
+
+* `choose! a b h h' using hyp` does the same, except that it will remove dependency of
+  the functions on propositional arguments if possible. For example if `Y` is a proposition
+  and `A` and `B` are nonempty in the above example then we will instead get
+  `a : X → A`, `b : X → B`, and the assumptions
+  `h : ∀ (x : X) (y : Y), P x y (a x) (b x)` and
+  `h' : ∀ (x : X) (y : Y), Q x y (a x) (b x)`.
+
+The `using hyp` part can be omitted,
+which will effectively cause `choose` to start with an `intro hyp`.
 -/
 example (X : Type) (P : X → ℝ → Prop)
 /-
@@ -129,6 +146,26 @@ theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonem
     · exact hy default
 
 end Example2
+
+
+
+section Exercise1
+
+open Set
+
+theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s : Set (α × β)}
+(h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
+  have : ∀ x ∈ Prod.fst '' s, ∃ y, (x, y) ∈ s := forall_mem_image.2 fun (x, y) h ↦ ⟨y, h⟩
+  --`挖空`
+  choose! f hf using this
+
+  rw [forall_mem_image] at hf
+  use f
+  rw [graphOn, image_image, EqOn.image_eq_self]
+  exact fun x hx ↦ h (hf hx) hx rfl
+
+end Exercise1
+
 
 
 
