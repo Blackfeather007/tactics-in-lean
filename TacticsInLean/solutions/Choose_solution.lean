@@ -54,6 +54,8 @@ end Introduction1
 
 section Introduction2
 --Reference : Mathmatics in Lean C4S2
+--Sometimes the **recases and obtain may not work**
+----`主讲老师请务必强调, 能用rcases 或 obtain 解决就不要用 choose`
 
 variable {α β : Type*} [Inhabited α]
 
@@ -90,11 +92,8 @@ end Introduction2
 
 section Example1
 
---Sometimes the **recases and obtain may not work**
 open Pointwise
-/-**Example 1** : backgroud(this project will be one of the finnal projet) :
-Suppose that $G$ is a group with subgroups $H$ and $K$ such that $H \cap K = \{1\}$, then
-$HK \cong H \times K$ (as sets).-/
+
 def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K) := by
   intro x
 
@@ -104,7 +103,7 @@ def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K)
 
   --`此题涉及到若干处类型转换, 较为困难,因此主讲老师 必须 讲解这道题`
   --之所以考虑保留此题是考虑到类型转换"早折磨晚折磨应该也差不多"
-  --`主讲老师请务必强调, 能用rcases 或 obtain 解决就不要用 choose`
+
   -- obtain⟨a, ha⟩ := mem_mul_eq
   set a := choose mem_mul_eq with a_def
   set ha := choose_spec mem_mul_eq
@@ -150,8 +149,11 @@ end Example2
 
 
 section Exercise1
+--Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Data/Set/Function.lean#L669-L680
 
 open Set
+
+#check exists_eq_graphOn_image_fst
 
 theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s : Set (α × β)}
 (h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
@@ -168,13 +170,14 @@ end Exercise1
 
 
 
-
 section Exercise2
+--Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Data/Set/Lattice.lean#L198-L201
 
 open Set
 
---https://github.com/leanprover-community/mathlib4/blob/8bd57d67caa56c16d165be48ea7309648270f309/Mathlib/Data/Set/Lattice.lean#L201
-theorem nonempty_of_nonempty_iUnion {α : Type*} {ι : Sort*} {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) :
+#check nonempty_of_nonempty_iUnion
+
+theorem mynonempty_of_nonempty_iUnion {α : Type*} {ι : Sort*} {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) :
  Nonempty ι := by
   obtain ⟨x, hx⟩ := h_Union
   have : ∃ i, x ∈ s i := mem_iUnion.mp hx
@@ -185,9 +188,11 @@ end Exercise2
 
 
 section Exercise3
-
 --Reference : https://github.com/leanprover-community/mathlib4/blob/b09464fc7b0ff4bcfd4de7ff54289799009b5913/Mathlib/Logic/Equiv/Set.lean#L406
+
 open Set
+
+#check Equiv.Set.imageOfInjOn
 
 /-- If a function `f` is injective on a set `s`, then `s` is equivalent to `f '' s`. -/
 def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
@@ -203,6 +208,9 @@ end Exercise3
 
 
 section Exercise4
+--Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Data/Set/Lattice.lean#L1942-L1949
+
+#check Set.sigmaEquiv
 
 noncomputable def mySet.sigmaEquiv{α : Type*} {β : Type*} (s : α → Set β) (hs : ∀ (b : β), ∃! i : α, b ∈ s i) :
 (i : α) × ↑(s i) ≃ β where
@@ -215,15 +223,15 @@ end Exercise4
 
 
 
-
 section Exercise5
-
 --Some thing useful which similar to Classical.choose
+--Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Algebra/Order/Archimedean/Basic.lean#L225-L236
 
 #check Nat.find
 #check Nat.find_spec
 #check Nat.find_min
 
+#check exists_nat_pow_near
 
 theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
   have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
@@ -240,8 +248,8 @@ end Exercise5
 
 
 section Exercise6
+--Reference : https://github.com/leanprover-community/mathlib4/blob/1ed7634f46ba697f891ebfb3577230329d4b7196/Mathlib/Algebra/Order/CauSeq/BigOperators.lean#L154
 
---https://github.com/leanprover-community/mathlib4/blob/1ed7634f46ba697f891ebfb3577230329d4b7196/Mathlib/Algebra/Order/CauSeq/BigOperators.lean#L154
 #check IsCauSeq.of_decreasing_bounded
 
 theorem my_IsCauSeq.of_decreasing_bounded (f : ℕ → ℝ) {a : ℝ}(ham : ∀ n, |f n| ≤ a) (hnm : ∀ n, f n.succ ≤ f n) :
