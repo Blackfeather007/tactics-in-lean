@@ -151,25 +151,23 @@ section Example2
 open Set
 
 theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonempty ι] [Inhabited ι]{s : ι → Set α} {f : α → β}
- (h : Set.InjOn f (⋃ (i : ι), s i)) : f '' ⋂ (i : ι), s i = ⋂ (i : ι), f '' s i := by
-  apply Subset.antisymm
-  · exact image_iInter_subset s f
-  · intro y hy
-    simp only [mem_iInter, mem_image] at hy
-    --`挖空`
-    choose x hx hy using hy
-    use x default
+ (h : Set.InjOn f (⋃ (i : ι), s i)) : f '' ⋂ (i : ι), s i ⊇ ⋂ (i : ι), f '' s i := by
+  intro y hy
+  simp only [mem_iInter, mem_image] at hy
+  --`挖空`
+  choose x hx hy using hy
+  use x default
 
-    constructor
-    · apply mem_iInter.2
-      intro i
-      suffices x default = x i by
-        rw [this]
-        apply hx
-      have : ∀ i, x i ∈ ⋃ j, s j := fun i => (subset_iUnion _ _) (hx i)
-      apply h (this _) (this _)
-      simp only [hy]
-    · exact hy default
+  constructor
+  · apply mem_iInter.2
+    intro i
+    suffices x default = x i by
+      rw [this]
+      apply hx
+    have : ∀ i, x i ∈ ⋃ j, s j := fun i => (subset_iUnion _ _) (hx i)
+    apply h (this _) (this _)
+    simp only [hy]
+  · exact hy default
 
 end Example2
 
