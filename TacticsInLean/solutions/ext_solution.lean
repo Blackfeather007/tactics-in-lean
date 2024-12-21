@@ -93,7 +93,7 @@ example (n : ℕ) (a : ℕ → ℕ) (ha : ∀ i ≤ n + 2, 0 < a i) :  ∑ i ∈
   apply ha
   linarith
 
-example {α : Type*} [SupSet α] {p : ι → Prop} {f g : (i : ι) → p i → α} (h : ∀ i (hi : p i), f i hi = g i hi) : ⨆ i, ⨆ (hi : p i), f i hi = ⨆ i, ⨆ (hi : p i), g i hi := by
+example {α ι : Type*} [SupSet α] {p : ι → Prop} {f g : (i : ι) → p i → α} (h : ∀ i (hi : p i), f i hi = g i hi) : ⨆ i, ⨆ (hi : p i), f i hi = ⨆ i, ⨆ (hi : p i), g i hi := by
   congr; ext i; congr; ext hi; exact h i hi
 
 def f : ℕ → ℚ := fun x => (x * (x + 1) / ((x + 2) * (x + 3) : ℚ)) * ((x + 2) / (x + 1 : ℚ))

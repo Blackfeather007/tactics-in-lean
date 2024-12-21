@@ -28,7 +28,7 @@ example {α β : Type*} (f : α → β) (s : Set α) (v : Set β) : f '' s ∩ v
 
 example (n : ℕ) (a : ℕ → ℕ) (ha : ∀ i ≤ n + 2, 0 < a i) :  ∑ i ∈ Finset.range (n + 1), ↑(a (n + 2)) / (a (n + 1) : ℚ) * ((a 0) * (a (n + 1)) / ((a i : ℚ) * (a (i + 1) : ℚ))) + (a 0) * (a (n + 2)) / ((a (n + 1) : ℚ) * (a (n + 2) : ℚ)) = ∑ x ∈ Finset.range (n + 1), (a 0) * (a (n + 2)) / ((a x : ℚ) * (a (x + 1) : ℚ)) + (a 0) * (a (n + 2)) / ((a (n + 1) : ℚ) * (a (n + 1 + 1) : ℚ)) := by sorry
 
-example {α : Type*} [SupSet α] {p : ι → Prop} {f g : (i : ι) → p i → α} (h : ∀ i (hi : p i), f i hi = g i hi) : ⨆ i, ⨆ (hi : p i), f i hi = ⨆ i, ⨆ (hi : p i), g i hi := by sorry
+example {α ι : Type*} [SupSet α] {p : ι → Prop} {f g : (i : ι) → p i → α} (h : ∀ i (hi : p i), f i hi = g i hi) : ⨆ i, ⨆ (hi : p i), f i hi = ⨆ i, ⨆ (hi : p i), g i hi := by sorry
 
 def f : ℕ → ℚ := fun x => (x * (x + 1) / ((x + 2) * (x + 3) : ℚ)) * ((x + 2) / (x + 1 : ℚ))
 def g (y : ℕ) : ℕ → ℚ := fun x => x + y

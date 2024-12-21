@@ -4,7 +4,7 @@ import Mathlib.Tactic
 
 open Nat
 
-example (h : ¬¬Q) : Q := by
+example {Q : Prop} (h : ¬¬Q) : Q := by
   by_contra h'
   exact h h'
 

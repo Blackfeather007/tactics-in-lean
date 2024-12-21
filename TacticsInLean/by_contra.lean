@@ -4,7 +4,7 @@ import Mathlib.Tactic
 
 open Nat
 
-example (h : ¬¬Q) : Q := by sorry
+example {Q : Prop} (h : ¬¬Q) : Q := by sorry
 
 def FnUb (f : ℝ → ℝ) (a : ℝ) : Prop :=
   ∀ x, f x ≤ a
