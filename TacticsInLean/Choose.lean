@@ -7,7 +7,7 @@ suppress_compilation
 
 section Introduction1
 example (X : Type) (P : X → ℝ → Prop)(h : ∀ ε > 0, ∃ x, P x ε) : ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
-
+  --use the `choose` tactic to replace these "sorry"s
   let g : (ε : ℝ) → ε > 0 → X := sorry
   have hg : ∀ (ε : ℝ) (a : ε > 0), P (g ε a) ε := sorry
 
@@ -29,6 +29,7 @@ variable (P : α → Prop) (h : ∃ x, P x)
 #check Classical.choose h
 
 example : P (Classical.choose h) :=
+  --use `Classical.choose_spec`
   sorry
 
 def inverse (f : α → β) : β → α := fun y : β ↦
@@ -36,6 +37,7 @@ def inverse (f : α → β) : β → α := fun y : β ↦
 
 theorem inverse_spec {f : α → β} (y : β) (h : ∃ x, f x = y) : f (inverse f y) = y := by
   rw [inverse, dif_pos h]
+  --use `Classical.choose_spec`
   sorry
 
 end Introduction2
@@ -53,16 +55,20 @@ def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ 
     exact mem_image_of_mem f p.2
   invFun := by
     intro p
+    have hint : p.1 ∈ f '' s := p.2
+    --use `Classical.choose` and `Classical.choose_spec`
     sorry
   left_inv := by
     intro p
     have : f p ∈ f '' s := mem_image_of_mem f p.2
 
     have feq : f (choose this) = f p := by
+      --use `Classical.choose_spec`
       sorry
 
     have : (choose this) =  p := by
       apply H
+      --use `Classical.choose_spec`
       sorry
       exact p.2
       exact feq
@@ -72,9 +78,11 @@ def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ 
     intro p
     have : f (choose p.2) ∈ (f '' s) := by
       apply mem_image_of_mem
+      --use `Classical.choose_spec`
       sorry
 
     have : f (choose p.2) = p.1 := by
+      --use `Classical.choose_spec`
       sorry
 
     exact SetCoe.ext sorry
@@ -93,6 +101,7 @@ theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonem
   · intro y hy
     simp only [mem_iInter, mem_image] at hy
 
+    --use `choose` tactic to replace these "sorry"s
     let x : ι → α := sorry
     have hx : ∀ (i : ι), x i ∈ s i := sorry
     have hy : ∀ (i : ι), f (x i) = y := sorry
@@ -124,6 +133,7 @@ theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s 
 (h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
   have : ∀ x ∈ Prod.fst '' s, ∃ y, (x, y) ∈ s := forall_mem_image.2 fun (x, y) h ↦ ⟨y, h⟩
 
+  --use `choose` tactic to replace these "sorry"s
   let f : α → β := sorry
   have hf : ∀ x ∈ Prod.fst '' s, (x, f x) ∈ s := sorry
 
@@ -147,6 +157,7 @@ theorem mynonempty_of_nonempty_iUnion {α : Type*} {ι : Sort*} {s : ι → Set 
  Nonempty ι := by
   obtain ⟨x, hx⟩ := h_Union
   have : ∃ i, x ∈ s i := mem_iUnion.mp hx
+  --use `Classical.choose_spec``
   sorry
 
 end Exercise2
@@ -164,7 +175,14 @@ def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K)
     apply Set.mem_mul.mp
     exact Subtype.coe_prop x
 
+  --use `Classical.choose_spec`
+  set a := choose mem_mul_eq with a_def
+  have ha : choose mem_mul_eq ∈ H ∧ ∃ y ∈ K, choose mem_mul_eq * y = ↑x := sorry
+  set b := choose ha.2 with b_def
+
+  use ⟨a, ha.1⟩, b
   sorry
+
 
 end Exercise3
 
