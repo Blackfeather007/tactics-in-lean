@@ -21,7 +21,7 @@ The `have` tactic is for adding hypotheses to the local context of the main goal
 /-
 Part I: Usage and basic patterns of `have` (1)
 -/
- 
+
 -- Easy example 1: Introducing a simple proposition
 example (P : Prop) (h : P) : P ∧ P := by
   have hp : P := h  -- Introduce an assumption named hp, with type P, derived from h
@@ -71,7 +71,7 @@ example (a b : ℝ) (h : (a, b) = (1, 2)) : a = 1 := by
   -- Use the first part of the hypothesis `h1` to prove the goal.
 
   sorry
-
+ 
 /-
 Part II: Why is it necessary to use `have`? [`have` + `apply`?]
 
