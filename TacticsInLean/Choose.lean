@@ -2,49 +2,17 @@ import Mathlib.Tactic
 
 
 open Classical
-suppress_compilation -- because everything is noncomputable
+suppress_compilation
 
 
 section Introduction1
---Reference : https://www.ma.imperial.ac.uk/~buzzard/xena/formalising-mathematics-2024/Part_C/tactics/choose.html
---Reference : https://github.com/leanprover-community/mathlib4/blob/725fd7ac1c92cf4d7984b25646052f5a6e717d31/Mathlib/Tactic/Choose.lean#
-/-
- **∀ x, ∃ y, P(x,y) (where P(x,y) is some true-false statement depend on x and y)**
- **to an actual function which inputs an x and outputs a y such that P(x,y) is true.**
- * `choose a b h h' using hyp` takes a hypothesis `hyp` of the form
-  `∀ (x : X) (y : Y), ∃ (a : A) (b : B), P x y a b ∧ Q x y a b`
-  for some `P Q : X → Y → A → B → Prop` and outputs
-  into context a function `a : X → Y → A`, `b : X → Y → B` and two assumptions:
-  `h : ∀ (x : X) (y : Y), P x y (a x y) (b x y)` and
-  `h' : ∀ (x : X) (y : Y), Q x y (a x y) (b x y)`. It also works with dependent versions.
+example (X : Type) (P : X → ℝ → Prop)(h : ∀ ε > 0, ∃ x, P x ε) : ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
+  --use the `choose` tactic to replace these "sorry"s
+  let g : (ε : ℝ) → ε > 0 → X := sorry
+  have hg : ∀ (ε : ℝ) (a : ε > 0), P (g ε a) ε := sorry
 
-* `choose! a b h h' using hyp` does the same, except that it will remove dependency of
-  the functions on propositional arguments if possible. For example if `Y` is a proposition
-  and `A` and `B` are nonempty in the above example then we will instead get
-  `a : X → A`, `b : X → B`, and the assumptions
-  `h : ∀ (x : X) (y : Y), P x y (a x) (b x)` and
-  `h' : ∀ (x : X) (y : Y), Q x y (a x) (b x)`.
-
-The `using hyp` part can be omitted,
-which will effectively cause `choose` to start with an `intro hyp`.
--/
-example (X : Type) (P : X → ℝ → Prop)
-/-
-`h` is the hypothesis that given some `ε > 0` you can find an `x` such that the proposition is true for `x` and `ε`
--/
-(h : ∀ ε > 0, ∃ x, P x ε) :
-/-
-Conclusion: there's a sequence of elements of `X` satisfying the condition for smaller and smaller ε
--/
-  ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
-  choose g hg using h
-  /-
-  g : Π (ε : ℝ), ε > 0 → X
-  hg : ∀ (ε : ℝ) (H : ε > 0), P (g ε H) ε
-  -/
-  -- need to prove 1/(n+1)>0 (this is why I chose 1/(n+1) not 1/n, as 1/0=0 in Lean!)
   let u : ℕ → X := fun n ↦ g (1/(n+1)) (by positivity)
-  use u -- `u` works
+  use u
   intro n
   apply hg
 
@@ -53,52 +21,33 @@ end Introduction1
 
 
 section Introduction2
---Reference : Mathmatics in Lean C4S2
---Sometimes the **recases and obtain may not work**
-----`主讲老师请务必强调, 能用rcases 或 obtain 解决就不要用 choose`
 
 variable {α β : Type*} [Inhabited α]
-
-#check (default : α)
-/-
- Inhabited α is a typeclass that says that α has a designated element, called (default : α).
- This is sometimes referred to as a "pointed type".
- This class is used by functions that need to return a value of the type when called "out of domain".
- For example, Array.get! arr i : α returns a value of type α when arr : Array α, but if i is not in range of the array,
- it reports a panic message, but this does not halt the program, so it must still return a value of type α
- (and in fact this is required for logical consistency), so in this case it returns default.
--/
 
 variable (P : α → Prop) (h : ∃ x, P x)
 
 #check Classical.choose h
 
 example : P (Classical.choose h) :=
-  Classical.choose_spec h
-
-/- **Given prop h : ∃ x, P x, the value of Classical.choose h is some x satisfying P x.**
- **The theorem Classical.choose_spec h says that Classical.choose h meets this specification.**-/
+  --use `Classical.choose_spec`
+  sorry
 
 def inverse (f : α → β) : β → α := fun y : β ↦
   if h : ∃ x, f x = y then Classical.choose h else default
 
 theorem inverse_spec {f : α → β} (y : β) (h : ∃ x, f x = y) : f (inverse f y) = y := by
   rw [inverse, dif_pos h]
-  exact Classical.choose_spec h
+  --use `Classical.choose_spec`
+  sorry
 
 end Introduction2
 
 
 
 section Example1
---Reference : https://github.com/leanprover-community/mathlib4/blob/b09464fc7b0ff4bcfd4de7ff54289799009b5913/Mathlib/Logic/Equiv/Set.lean#L406
---`有类型转换`
 
 open Set
 
-#check Equiv.Set.imageOfInjOn
-
-/-- If a function `f` is injective on a set `s`, then `s` is equivalent to `f '' s`. -/
 def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ f '' s where
   toFun := by
     intro p
@@ -106,42 +55,37 @@ def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ 
     exact mem_image_of_mem f p.2
   invFun := by
     intro p
-    --`挖空`
     have hint : p.1 ∈ f '' s := p.2
-    use choose p.2
-    exact (choose_spec p.2).1
+    --use `Classical.choose` and `Classical.choose_spec`
+    sorry
   left_inv := by
-    --We want to prove f⁻¹ (f p) = p
     intro p
     have : f p ∈ f '' s := mem_image_of_mem f p.2
-    show ⟨choose this, (choose_spec this).1⟩ = p
 
     have feq : f (choose this) = f p := by
-      --`挖空`
-      exact (choose_spec (mem_image_of_mem f p.2)).2
+      --use `Classical.choose_spec`
+      sorry
 
     have : (choose this) =  p := by
       apply H
-      --`挖空`
-      exact (choose_spec (mem_image_of_mem f p.2)).1
+      --use `Classical.choose_spec`
+      sorry
       exact p.2
       exact feq
-    exact SetCoe.ext this
+    exact SetCoe.ext sorry
 
   right_inv := by
-    --We want to prove f (f⁻¹ p) = p
     intro p
     have : f (choose p.2) ∈ (f '' s) := by
       apply mem_image_of_mem
-      --`挖空`
-      exact (choose_spec p.2).1
-    show ⟨f (choose p.2) ,this⟩ = p
+      --use `Classical.choose_spec`
+      sorry
 
     have : f (choose p.2) = p.1 := by
-      --`挖空`
-      exact (choose_spec p.2).2
+      --use `Classical.choose_spec`
+      sorry
 
-    exact SetCoe.ext this
+    exact SetCoe.ext sorry
 end Example1
 
 
@@ -156,8 +100,11 @@ theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonem
   · exact image_iInter_subset s f
   · intro y hy
     simp only [mem_iInter, mem_image] at hy
-    --`挖空`
-    choose x hx hy using hy
+
+    --use `choose` tactic to replace these "sorry"s
+    let x : ι → α := sorry
+    have hx : ∀ (i : ι), x i ∈ s i := sorry
+    have hy : ∀ (i : ι), f (x i) = y := sorry
     use x default
 
     constructor
@@ -185,8 +132,10 @@ open Set
 theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s : Set (α × β)}
 (h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
   have : ∀ x ∈ Prod.fst '' s, ∃ y, (x, y) ∈ s := forall_mem_image.2 fun (x, y) h ↦ ⟨y, h⟩
-  --`挖空`
-  choose! f hf using this
+
+  --use `choose` tactic to replace these "sorry"s
+  let f : α → β := sorry
+  have hf : ∀ x ∈ Prod.fst '' s, (x, f x) ∈ s := sorry
 
   rw [forall_mem_image] at hf
   use f
@@ -208,7 +157,8 @@ theorem mynonempty_of_nonempty_iUnion {α : Type*} {ι : Sort*} {s : ι → Set 
  Nonempty ι := by
   obtain ⟨x, hx⟩ := h_Union
   have : ∃ i, x ∈ s i := mem_iUnion.mp hx
-  use Classical.choose this
+  --use `Classical.choose_spec``
+  sorry
 
 end Exercise2
 
@@ -225,19 +175,14 @@ def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K)
     apply Set.mem_mul.mp
     exact Subtype.coe_prop x
 
-  --`此题涉及到若干处类型转换, 较为困难,因此主讲老师 必须 讲解这道题`
-  --之所以考虑保留此题是考虑到类型转换"早折磨晚折磨应该也差不多"
-
-  -- obtain⟨a, ha⟩ := mem_mul_eq
+  --use `Classical.choose_spec`
   set a := choose mem_mul_eq with a_def
-  set ha := choose_spec mem_mul_eq
+  have ha : choose mem_mul_eq ∈ H ∧ ∃ y ∈ K, choose mem_mul_eq * y = ↑x := sorry
   set b := choose ha.2 with b_def
-  set hb := choose_spec ha.2
-  -- simp only [Subsemigroup.mem_carrier, Submonoid.mem_toSubsemigroup, Subgroup.mem_toSubmonoid, ←
-  --   a_def, ← b_def] at ha hb--`非必须, 方便看infoview`
 
   use ⟨a, ha.1⟩, b
-  exact hb.1
+  sorry
+
 
 end Exercise3
 
@@ -262,8 +207,7 @@ noncomputable def mySet.sigmaEquiv{α : Type*} {β : Type*} (s : α → Set β) 
     · show (hs p.2).choose = p.1
       apply ExistsUnique.unique (hs p.2)
       · have : p.2.1 ∈ s (hs p.2).choose := by
-          --`挖空`
-          exact (hs p.2).choose_spec.1
+          sorry
         exact this
       · have : p.2.1 ∈ s p.1 := by
           exact Subtype.coe_prop p.snd
@@ -288,12 +232,12 @@ section Exercise5
 theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
   have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
   let n := Nat.find h
-  have hn : x < y ^ n := Nat.find_spec h
+  have hn : x < y ^ n := by sorry
   have hnp : 0 < n :=
     pos_iff_ne_zero.2 fun hn0 => by rw [hn0, pow_zero] at hn; exact not_le_of_gt hn hx
   have hnsp : Nat.pred n + 1 = n := Nat.succ_pred_eq_of_pos hnp
   have hltn : Nat.pred n < n := Nat.pred_lt (ne_of_gt hnp)
-  exact ⟨Nat.pred n, le_of_not_lt (Nat.find_min h hltn), by rwa [hnsp]⟩
+  sorry
 
 end Exercise5
 
@@ -317,8 +261,8 @@ IsCauSeq abs f := fun ε ε0 ↦ by
       _ ≤ _ := neg_le_of_abs_le (ham n)
 
   let l := Nat.find h
-  --`此处挖空`
-  have hl : ∀ (n : ℕ), a - l • ε < f n := Nat.find_spec h
+
+  have hl : ∀ (n : ℕ), a - l • ε < f n := sorry
 
   have hl0 : l ≠ 0 := by
     intro heq0
@@ -327,11 +271,9 @@ IsCauSeq abs f := fun ε ε0 ↦ by
 
   have hint : l - 1 < l := by simp only [tsub_lt_self_iff, zero_lt_one, and_true,Nat.zero_lt_of_ne_zero hl0]
 
-  --`此处挖空`
+
   have hl' : ∃ (n : ℕ), a - (l - 1) • ε ≥ f n := by
-    have := Nat.find_min h hint
-    simp only [not_forall, not_lt] at this
-    exact this
+    sorry
 
   obtain ⟨i, hi⟩ := hl'
   use i
