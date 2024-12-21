@@ -7,8 +7,10 @@ suppress_compilation
 
 section Introduction1
 example (X : Type) (P : X → ℝ → Prop)(h : ∀ ε > 0, ∃ x, P x ε) : ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
-  --g : (ε : ℝ) → ε > 0 → X
-  --hg : ∀ (ε : ℝ) (a : ε > 0), P (g ε a) ε
+
+  let g : (ε : ℝ) → ε > 0 → X := sorry
+  have hg : ∀ (ε : ℝ) (a : ε > 0), P (g ε a) ε := sorry
+
   let u : ℕ → X := fun n ↦ g (1/(n+1)) (by positivity)
   use u
   intro n
@@ -53,10 +55,8 @@ def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ 
     intro p
     sorry
   left_inv := by
-    --We want to prove f⁻¹ (f p) = p
     intro p
     have : f p ∈ f '' s := mem_image_of_mem f p.2
-    show ⟨choose this, (choose_spec this).1⟩ = p
 
     have feq : f (choose this) = f p := by
       sorry
@@ -66,19 +66,18 @@ def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ 
       sorry
       exact p.2
       exact feq
-    exact SetCoe.ext this
+    exact SetCoe.ext sorry
 
   right_inv := by
     intro p
     have : f (choose p.2) ∈ (f '' s) := by
       apply mem_image_of_mem
       sorry
-    show ⟨f (choose p.2) ,this⟩ = p
 
     have : f (choose p.2) = p.1 := by
       sorry
 
-    exact SetCoe.ext this
+    exact SetCoe.ext sorry
 end Example1
 
 
@@ -94,7 +93,9 @@ theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonem
   · intro y hy
     simp only [mem_iInter, mem_image] at hy
 
-    sorry
+    let x : ι → α := sorry
+    have hx : ∀ (i : ι), x i ∈ s i := sorry
+    have hy : ∀ (i : ι), f (x i) = y := sorry
     use x default
 
     constructor
@@ -122,7 +123,9 @@ open Set
 theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s : Set (α × β)}
 (h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
   have : ∀ x ∈ Prod.fst '' s, ∃ y, (x, y) ∈ s := forall_mem_image.2 fun (x, y) h ↦ ⟨y, h⟩
-  sorry
+
+  let f : α → β := sorry
+  have hf : ∀ x ∈ Prod.fst '' s, (x, f x) ∈ s := sorry
 
   rw [forall_mem_image] at hf
   use f
