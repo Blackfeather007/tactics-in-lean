@@ -123,11 +123,8 @@ end Example2
 
 
 section Exercise1
---Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Data/Set/Function.lean#L669-L680
 
 open Set
-
-#check exists_eq_graphOn_image_fst
 
 theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s : Set (α × β)}
 (h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
@@ -147,11 +144,8 @@ end Exercise1
 
 
 section Exercise2
---Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Data/Set/Lattice.lean#L198-L201
 
 open Set
-
-#check nonempty_of_nonempty_iUnion
 
 theorem mynonempty_of_nonempty_iUnion {α : Type*} {ι : Sort*} {s : ι → Set α} (h_Union : (⋃ i, s i).Nonempty) :
  Nonempty ι := by
@@ -189,9 +183,6 @@ end Exercise3
 
 
 section Exercise4
---Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Data/Set/Lattice.lean#L1942-L1949
-
-#check Set.sigmaEquiv
 
 noncomputable def mySet.sigmaEquiv{α : Type*} {β : Type*} (s : α → Set β) (hs : ∀ (b : β), ∃! i : α, b ∈ s i) :
 (i : α) × (s i) ≃ β where
@@ -221,13 +212,10 @@ end Exercise4
 
 section Exercise5
 --Some thing useful which similar to Classical.choose
---Reference : https://github.com/leanprover-community/mathlib4/blob/c91dd0e151d3f0b6755d35119cd7943a516addb8/Mathlib/Algebra/Order/Archimedean/Basic.lean#L225-L236
 
 #check Nat.find
 #check Nat.find_spec
 #check Nat.find_min
-
-#check exists_nat_pow_near
 
 theorem myexists_nat_pow_near {x y : ℕ}(hx : 1 ≤ x) (hy : 1 < y) : ∃ n : ℕ, y ^ n ≤ x ∧ x < y ^ (n + 1) := by
   have h : ∃ n : ℕ, x < y ^ n := pow_unbounded_of_one_lt _ hy
@@ -244,9 +232,6 @@ end Exercise5
 
 
 section Exercise6
---Reference : https://github.com/leanprover-community/mathlib4/blob/1ed7634f46ba697f891ebfb3577230329d4b7196/Mathlib/Algebra/Order/CauSeq/BigOperators.lean#L154
-
-#check IsCauSeq.of_decreasing_bounded
 
 theorem my_IsCauSeq.of_decreasing_bounded (f : ℕ → ℝ) {a : ℝ}(ham : ∀ n, |f n| ≤ a) (hnm : ∀ n, f n.succ ≤ f n) :
 IsCauSeq abs f := fun ε ε0 ↦ by
