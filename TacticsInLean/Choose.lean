@@ -76,11 +76,6 @@ def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ 
 
   right_inv := by
     intro p
-    have : f (choose p.2) ∈ (f '' s) := by
-      apply mem_image_of_mem
-      --use `Classical.choose_spec`
-      sorry
-
     have : f (choose p.2) = p.1 := by
       --use `Classical.choose_spec`
       sorry
@@ -168,11 +163,10 @@ def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K)
     exact Subtype.coe_prop x
 
   --use `Classical.choose_spec`
-  set a := choose mem_mul_eq with a_def
-  have ha : choose mem_mul_eq ∈ H ∧ ∃ y ∈ K, choose mem_mul_eq * y = ↑x := sorry
-  set b := choose ha.2 with b_def
+  set a := choose mem_mul_eq
+  have ha : a ∈ H ∧ ∃ y ∈ K, a * y = x := by sorry
+  set b := choose ha.2
 
-  use ⟨a, ha.1⟩, b
   sorry
 
 
@@ -195,12 +189,10 @@ noncomputable def mySet.sigmaEquiv{α : Type*} {β : Type*} (s : α → Set β) 
     ext
     · show (hs p.2).choose = p.1
       apply ExistsUnique.unique (hs p.2)
-      · have : p.2.1 ∈ s (hs p.2).choose := by
-          sorry
-        exact this
-      · have : p.2.1 ∈ s p.1 := by
-          exact Subtype.coe_prop p.snd
-        exact this
+      · show p.2.1 ∈ s (hs p.2).choose
+        sorry
+      · show p.2.1 ∈ s p.1
+        exact Subtype.coe_prop p.snd
     · rfl
   right_inv _:= rfl
 

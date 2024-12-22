@@ -131,12 +131,6 @@ def myimageOfInjOn {α β} (f : α → β) (s : Set α) (H : InjOn f s) : s ≃ 
   right_inv := by
     --We want to prove f (f⁻¹ p) = p
     intro p
-    have : f (choose p.2) ∈ (f '' s) := by
-      apply mem_image_of_mem
-      --`挖空`
-      exact (choose_spec p.2).1
-    show ⟨f (choose p.2) ,this⟩ = p
-
     have : f (choose p.2) = p.1 := by
       --`挖空`
       exact (choose_spec p.2).2
@@ -259,13 +253,8 @@ noncomputable def mySet.sigmaEquiv{α : Type*} {β : Type*} (s : α → Set β) 
     ext
     · show (hs p.2).choose = p.1
       apply ExistsUnique.unique (hs p.2)
-      · have : p.2.1 ∈ s (hs p.2).choose := by
-          --`挖空`
-          exact (hs p.2).choose_spec.1
-        exact this
-      · have : p.2.1 ∈ s p.1 := by
-          exact Subtype.coe_prop p.snd
-        exact this
+      · exact (hs p.2).choose_spec.1
+      · exact Subtype.coe_prop p.snd
     · rfl
   right_inv _:= rfl
 
