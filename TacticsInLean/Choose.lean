@@ -22,9 +22,8 @@ example (h : ∀ i : ℕ, i < 7 → ∃ j, i < j ∧ j < i+i) : True := by
 
 section Introduction1
 example (X : Type) (P : X → ℝ → Prop)(h : ∀ ε > 0, ∃ x, P x ε) : ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
-  --use the `choose` tactic to replace these "sorry"s
-  let g : (ε : ℝ) → ε > 0 → X := sorry
-  have hg : ∀ (ε : ℝ) (a : ε > 0), P (g ε a) ε := sorry
+
+  choose g hg using h
 
   let u : ℕ → X := fun n ↦ g (1/(n+1)) (by positivity)
   use u
