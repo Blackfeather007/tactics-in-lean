@@ -115,7 +115,7 @@ theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonem
   intro y hy
   simp only [mem_iInter, mem_image] at hy
 
-  --`用choose tactic 替换掉下面两行，如 Introduction1 示例所示`
+  --`用choose tactic 替换掉下面三行，如 Introduction1 示例所示`
   let x : ι → α := sorry
   have hx : ∀ (i : ι), x i ∈ s i := sorry
   have hy : ∀ (i : ι), f (x i) = y := sorry
@@ -176,6 +176,11 @@ section Exercise3
 
 open Pointwise
 
+/-
+定义 $HK = \{hk\  \vert\  h \in H,k\in K\} $ , 构造 $HK \to H \times K$ 的映射
+对于每个$x \in HK,$ 必然存在$h\in H,k\in K$ 使得 $x = hk$ ,我们即可让$x \mapsto (h,k)$
+-/
+
 def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K) := by
   intro x
 
@@ -189,7 +194,6 @@ def Hom_top_product_of_normal_of_disjoint (H K : Set ℝ) : (H * K) → (H × K)
   set b := choose ha.2
 
   sorry
-
 
 end Exercise3
 
