@@ -4,6 +4,21 @@ import Mathlib.Tactic
 open Classical
 suppress_compilation -- because everything is noncomputable
 
+#help tactic choose
+
+example (h : ∀ n m : ℕ, ∃ i j, m = n + i ∨ m + j = n) : True := by
+    choose i j h using h
+    guard_hyp i : ℕ → ℕ → ℕ
+    guard_hyp j : ℕ → ℕ → ℕ
+    guard_hyp h : ∀ (n m : ℕ), m = n + i n m ∨ m + j n m = n
+    trivial
+
+example (h : ∀ i : ℕ, i < 7 → ∃ j, i < j ∧ j < i+i) : True := by
+  choose! f h h' using h
+  guard_hyp f : ℕ → ℕ
+  guard_hyp h : ∀ (i : ℕ), i < 7 → i < f i
+  guard_hyp h' : ∀ (i : ℕ), i < 7 → f i < i + i
+  trivial
 
 section Introduction1
 --Reference : https://www.ma.imperial.ac.uk/~buzzard/xena/formalising-mathematics-2024/Part_C/tactics/choose.html

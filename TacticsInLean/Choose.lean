@@ -4,6 +4,21 @@ import Mathlib.Tactic
 open Classical
 suppress_compilation
 
+#help tactic choose
+
+example (h : ∀ n m : ℕ, ∃ i j, m = n + i ∨ m + j = n) : True := by
+    choose i j h using h
+    guard_hyp i : ℕ → ℕ → ℕ
+    guard_hyp j : ℕ → ℕ → ℕ
+    guard_hyp h : ∀ (n m : ℕ), m = n + i n m ∨ m + j n m = n
+    trivial
+
+example (h : ∀ i : ℕ, i < 7 → ∃ j, i < j ∧ j < i+i) : True := by
+  choose! f h h' using h
+  guard_hyp f : ℕ → ℕ
+  guard_hyp h : ∀ (i : ℕ), i < 7 → i < f i
+  guard_hyp h' : ∀ (i : ℕ), i < 7 → f i < i + i
+  trivial
 
 section Introduction1
 example (X : Type) (P : X → ℝ → Prop)(h : ∀ ε > 0, ∃ x, P x ε) : ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
@@ -94,10 +109,8 @@ theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonem
   intro y hy
   simp only [mem_iInter, mem_image] at hy
 
-  --use `choose` tactic to replace these "sorry"s
-  let x : ι → α := sorry
-  have hx : ∀ (i : ι), x i ∈ s i := sorry
-  have hy : ∀ (i : ι), f (x i) = y := sorry
+  choose x hx hy using hy
+
   use x default
 
   constructor
@@ -123,9 +136,7 @@ theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s 
 (h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
   have : ∀ x ∈ Prod.fst '' s, ∃ y, (x, y) ∈ s := forall_mem_image.2 fun (x, y) h ↦ ⟨y, h⟩
 
-  --use `choose` tactic to replace these "sorry"s
-  let f : α → β := sorry
-  have hf : ∀ x ∈ Prod.fst '' s, (x, f x) ∈ s := sorry
+  choose! f hf using this
 
   rw [forall_mem_image] at hf
   use f
