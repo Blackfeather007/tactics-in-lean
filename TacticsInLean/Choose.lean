@@ -22,7 +22,14 @@ example (h : ∀ i : ℕ, i < 7 → ∃ j, i < j ∧ j < i+i) : True := by
 
 section Introduction1
 example (X : Type) (P : X → ℝ → Prop)(h : ∀ ε > 0, ∃ x, P x ε) : ∃ u : ℕ → X, ∀ n, P (u n) (1/(n+1)) := by
-
+  --`用choose tactic 替换掉下面两行，示例如下`
+  let g : (ε : ℝ) → ε > 0 → X := sorry
+  have hg : ∀ (ε : ℝ) (a : ε > 0), P (g ε a) ε := sorry
+  /-
+  `-`let g : (ε : ℝ) → ε > 0 → X := sorry
+  `-`have hg : ∀ (ε : ℝ) (a : ε > 0), P (g ε a) ε := sorry
+  `+`choose g hg using h
+  -/
   choose g hg using h
 
   let u : ℕ → X := fun n ↦ g (1/(n+1)) (by positivity)
@@ -108,10 +115,12 @@ theorem mySet.InjOn.image_iInter_eq{α : Type*} {β : Type*} {ι : Sort*} [Nonem
   intro y hy
   simp only [mem_iInter, mem_image] at hy
 
-  choose x hx hy using hy
+  --`用choose tactic 替换掉下面两行，如 Introduction1 示例所示`
+  let x : ι → α := sorry
+  have hx : ∀ (i : ι), x i ∈ s i := sorry
+  have hy : ∀ (i : ι), f (x i) = y := sorry
 
   use x default
-
   constructor
   · apply mem_iInter.2
     intro i
@@ -135,7 +144,9 @@ theorem myexists_eq_graphOn_image_fst{α : Type*} {β : Type*} [Nonempty β] {s 
 (h : Set.InjOn Prod.fst s) : ∃ (f : α → β), s = Set.graphOn f (Prod.fst '' s):= by
   have : ∀ x ∈ Prod.fst '' s, ∃ y, (x, y) ∈ s := forall_mem_image.2 fun (x, y) h ↦ ⟨y, h⟩
 
-  choose! f hf using this
+  --`用choose！tactic 替换掉下面两行，如 Introduction1 示例所示`
+  let f : α → β := sorry
+  have hf : ∀ x ∈ Prod.fst '' s, (x, f x) ∈ s := sorry
 
   rw [forall_mem_image] at hf
   use f
