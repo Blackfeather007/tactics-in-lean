@@ -2,13 +2,6 @@ import Mathlib.Tactic
 
 section linarith
 
-#help tactic linarith
-
-/-
-The linarith tactic solves certain kinds of linear equalities and inequalities in concrete types such as the naturals or reals.
--/
-
-
 /- Hint: try to use `lt_of_lt_of_le` and `add_lt_add` to prove it -/
 example {a b c d : ℝ} (h1 : a < b) (h2 : b ≤ c) (h3 : c = d) : a + a < d + b := by
   refine add_lt_add ?_ h1
@@ -56,25 +49,10 @@ example {a b c : ℝ} (ha : a ≤ b + c) (hb : b ≤ a + c) (hc : c ≤ a + b) :
   have hc_eq : c = x + y := by linarith [hx_def, hy_def]
   exact ⟨x, y, z, hx, hy, hz, ha_eq, hb_eq, hc_eq⟩
 
-
-/- linarith对Order的要求-/
--- example {α : Type*} [Preorder α] (x: α) (h: x < x) : False := by
---   linarith -- fails
-
-example {α: Type*} [LinearOrderedCommRing α] (x : α) (h: x < x) : False := by
-  linarith -- succeeds
-
-
 end linarith
 
 
-
 section nlinarith
-
-#help tactic nlinarith
-
-
-example {x : ℝ} (h : x ≤ -3) : x ^ 2 ≥ 9 := by nlinarith
 
 example {n : ℕ} : n ^ 2 ≠ 2 :=
 match n with
@@ -83,7 +61,5 @@ match n with
 | n + 2 => fun h ↦ by
   rw [add_sq] at h
   nlinarith
-
--- example {x : ℝ} (h : x ≤ -3) : x ^ 2 ≥ 9 := by linarith
 
 end nlinarith
