@@ -67,6 +67,31 @@ example {c : ℝ} (h : c ≠ 0) : Function.Injective fun x ↦ c * x := by
   intro x₁ x₂ h'
   exact mul_left_cancel₀ h h'
 
+example : ∀ (r : ℝ) (hr : r > 0), ∃ (s : ℝ) (hs : s > 0), ¬ r ≤ s := by
+  -- there's no smallest positive rational number
+  intro r hr
+  use r / 2
+  have gtzero : r / 2 > 0 := by exact half_pos hr
+  use gtzero
+  intro g1
+  have g2 : r / 2 < r := by exact half_lt_self hr
+  have : r < r := by exact lt_of_le_of_lt g1 g2
+  apply lt_irrefl r this
+
+example {α : Type*} (s : Finset α) : ∃ n : ℕ, ∃ g : s → ZMod n, Function.Injective g := by
+  use s.card
+  let equiv := Finset.equivFin s
+  let f1 := equiv.toFun
+  let f2 : Fin s.card → ZMod s.card := fun x => x
+  use f2 ∘ f1
+  refine Function.Injective.comp ?_ equiv.injective
+  intros x y hxy
+  dsimp [f2] at hxy
+  rw [ZMod.natCast_eq_natCast_iff] at hxy
+  obtain ⟨x, Hx⟩ := x
+  obtain ⟨y, Hy⟩ := y
+  simp at *
+  exact Nat.ModEq.eq_of_lt_of_lt hxy Hx Hy
 end intro
 
 section intros

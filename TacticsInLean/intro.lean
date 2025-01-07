@@ -84,6 +84,16 @@ example (c : ℝ) : Function.Injective fun x ↦ x + c := by
 example {c : ℝ} (h : c ≠ 0) : Function.Injective fun x ↦ c * x := by
   sorry
 
+
+/- Here are some exercises that has connection with `use`, you can do it later-/
+example : ∀ (r : ℚ) (hr : r > 0), ∃ (s : ℚ) (hs : s > 0), ¬ r ≤ s := by
+  -- there's no smallest positive rational number
+  sorry
+
+/- A really hard one-/
+example {α : Type*} (s : Finset α) : ∃ n : ℕ, ∃ g : s → ZMod n, Function.Injective g := by
+  sorry
+
 end intro
 
 section intros
